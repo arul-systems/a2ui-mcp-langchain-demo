@@ -1,0 +1,10 @@
+.idea
+*.iml
+
+
+.venv
+.env
+__pycache__
+*.pyc
+agent/customers_mcp/customers.db
+/.idea/
