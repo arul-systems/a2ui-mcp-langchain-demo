@@ -1,0 +1,54 @@
+# Architecture of the a2ui-mcp-langchain-demo stack.
+# Render with: d2 docs/architecture.d2 docs/architecture.svg
+
+direction: right
+
+user: User {
+  shape: person
+  icon: https://icons.terrastruct.com/essentials/365-user.svg
+}
+
+frontend: agent-ui\n(React + A2UI renderer) {
+  icon: https://icons.terrastruct.com/dev/react.svg
+}
+
+backend: Agent Backend (Python) {
+  api: FastAPI\nserver.py {
+    icon: https://icons.terrastruct.com/dev/python.svg
+  }
+  agent_graph: LangGraph Agent\ngraph.py {
+    icon: https://icons.terrastruct.com/dev/python.svg
+  }
+  a2ui_support: A2UI Processor\na2ui_support.py {
+    icon: https://icons.terrastruct.com/dev/python.svg
+  }
+
+  api -> agent_graph: ainvoke()
+  api -> a2ui_support: parse_response()
+}
+
+llm: OpenAI API\n(LLM) {
+  shape: cloud
+}
+
+mcp_servers: MCP Servers (.mcp.json) {
+  item_mcp: item-mcp\nHTTP, in-memory state {
+    icon: https://icons.terrastruct.com/dev/python.svg
+  }
+  customers_mcp: customers-mcp\nstdio, mcp-server-sqlite {
+    icon: https://icons.terrastruct.com/dev/python.svg
+  }
+}
+
+customers_db: customers.db\n(SQLite) {
+  shape: cylinder
+  icon: https://icons.terrastruct.com/essentials/117-database.svg
+}
+
+user -> frontend: "interacts with form/chat"
+frontend -> backend.api: "POST /chat"
+backend.api -> frontend: "{ text, a2ui[] }"
+backend.agent_graph -> llm: "chat completion"
+backend.agent_graph -> mcp_servers.item_mcp: "list_items / create_item"
+backend.agent_graph -> mcp_servers.customers_mcp: "read_query / write_query"
+mcp_servers.customers_mcp -> customers_db: "SQL"

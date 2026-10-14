@@ -59,7 +59,9 @@ provided tools. Always use the tools to add/list/get items and to
 query customer data, and read back results; compute totals, counts, 
 and other math yourself from the tool results rather than guessing.\n\n
 When the user wants to create/add a new item but hasn't given you 
-concrete values for all of its fields in their message, don't guess \n\n 
+concrete values for all of its fields in their message, don't guess. \n\n
+
+ 
 {A2UI_PROCESSOR.prompt_snippet}"""
 )
 

@@ -30,28 +30,60 @@
           "component": "TextField",
           "label": "Name",
           "value": { "path": "/name" },
-          "variant": "shortText"
+          "variant": "shortText",
+          "checks": [
+            {
+              "condition": { "call": "required", "args": { "value": { "path": "/name" } } },
+              "message": "Name is required"
+            }
+          ]
         },
         {
           "id": "description_field",
           "component": "TextField",
           "label": "Description",
           "value": { "path": "/description" },
-          "variant": "longText"
+          "variant": "longText",
+          "checks": [
+            {
+              "condition": { "call": "required", "args": { "value": { "path": "/description" } } },
+              "message": "Description is required"
+            }
+          ]
         },
         {
           "id": "price_field",
           "component": "TextField",
           "label": "Price (USD)",
           "value": { "path": "/price" },
-          "variant": "number"
+          "variant": "number",
+          "checks": [
+            {
+              "condition": { "call": "required", "args": { "value": { "path": "/price" } } },
+              "message": "Price is required"
+            },
+            {
+              "condition": { "call": "numeric", "args": { "value": { "path": "/price" }, "min": 0 } },
+              "message": "Price must be 0 or greater"
+            }
+          ]
         },
         {
           "id": "quantity_field",
           "component": "TextField",
           "label": "Quantity in stock",
           "value": { "path": "/quantity" },
-          "variant": "number"
+          "variant": "number",
+          "checks": [
+            {
+              "condition": { "call": "required", "args": { "value": { "path": "/quantity" } } },
+              "message": "Quantity is required"
+            },
+            {
+              "condition": { "call": "numeric", "args": { "value": { "path": "/quantity" }, "min": 0 } },
+              "message": "Quantity must be 0 or greater"
+            }
+          ]
         },
         { "id": "submit_label", "component": "Text", "text": "Create Item" },
         {
@@ -59,6 +91,24 @@
           "component": "Button",
           "child": "submit_label",
           "variant": "primary",
+          "checks": [
+            {
+              "condition": {
+                "call": "and",
+                "args": {
+                  "values": [
+                    { "call": "required", "args": { "value": { "path": "/name" } } },
+                    { "call": "required", "args": { "value": { "path": "/description" } } },
+                    { "call": "required", "args": { "value": { "path": "/price" } } },
+                    { "call": "numeric", "args": { "value": { "path": "/price" }, "min": 0 } },
+                    { "call": "required", "args": { "value": { "path": "/quantity" } } },
+                    { "call": "numeric", "args": { "value": { "path": "/quantity" }, "min": 0 } }
+                  ]
+                }
+              },
+              "message": "Please fix the errors above before submitting"
+            }
+          ],
           "action": {
             "event": {
               "name": "create_item",

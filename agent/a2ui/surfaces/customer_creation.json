@@ -31,35 +31,76 @@
           "component": "TextField",
           "label": "Name",
           "value": { "path": "/name" },
-          "variant": "shortText"
+          "variant": "shortText",
+          "checks": [
+            {
+              "condition": { "call": "required", "args": { "value": { "path": "/name" } } },
+              "message": "Name is required"
+            }
+          ]
         },
         {
           "id": "email_field",
           "component": "TextField",
           "label": "Email",
           "value": { "path": "/email" },
-          "variant": "shortText"
+          "variant": "shortText",
+          "checks": [
+            {
+              "condition": { "call": "required", "args": { "value": { "path": "/email" } } },
+              "message": "Email is required"
+            },
+            {
+              "condition": { "call": "email", "args": { "value": { "path": "/email" } } },
+              "message": "Please enter a valid email address"
+            }
+          ]
         },
         {
           "id": "phone_field",
           "component": "TextField",
           "label": "Phone",
           "value": { "path": "/phone" },
-          "variant": "shortText"
+          "variant": "shortText",
+          "checks": [
+            {
+              "condition": { "call": "required", "args": { "value": { "path": "/phone" } } },
+              "message": "Phone is required"
+            },
+            {
+              "condition": {
+                "call": "regex",
+                "args": { "value": { "path": "/phone" }, "pattern": "^[0-9+()\\-\\s]{7,}$" }
+              },
+              "message": "Please enter a valid phone number"
+            }
+          ]
         },
         {
           "id": "city_field",
           "component": "TextField",
           "label": "City",
           "value": { "path": "/city" },
-          "variant": "shortText"
+          "variant": "shortText",
+          "checks": [
+            {
+              "condition": { "call": "required", "args": { "value": { "path": "/city" } } },
+              "message": "City is required"
+            }
+          ]
         },
         {
           "id": "country_field",
           "component": "TextField",
           "label": "Country",
           "value": { "path": "/country" },
-          "variant": "shortText"
+          "variant": "shortText",
+          "checks": [
+            {
+              "condition": { "call": "required", "args": { "value": { "path": "/country" } } },
+              "message": "Country is required"
+            }
+          ]
         },
         { "id": "submit_label", "component": "Text", "text": "Create Customer" },
         {
@@ -67,6 +108,28 @@
           "component": "Button",
           "child": "submit_label",
           "variant": "primary",
+          "checks": [
+            {
+              "condition": {
+                "call": "and",
+                "args": {
+                  "values": [
+                    { "call": "required", "args": { "value": { "path": "/name" } } },
+                    { "call": "required", "args": { "value": { "path": "/email" } } },
+                    { "call": "email", "args": { "value": { "path": "/email" } } },
+                    { "call": "required", "args": { "value": { "path": "/phone" } } },
+                    {
+                      "call": "regex",
+                      "args": { "value": { "path": "/phone" }, "pattern": "^[0-9+()\\-\\s]{7,}$" }
+                    },
+                    { "call": "required", "args": { "value": { "path": "/city" } } },
+                    { "call": "required", "args": { "value": { "path": "/country" } } }
+                  ]
+                }
+              },
+              "message": "Please fix the errors above before submitting"
+            }
+          ],
           "action": {
             "event": {
               "name": "create_customer",
