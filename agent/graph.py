@@ -36,51 +36,32 @@ Run this graph:
     uv run python agent/graph.py
 """
 
-import asyncio
 import json
-import sys
 from pathlib import Path
 from typing import TypedDict
 
 from dotenv import load_dotenv
 load_dotenv()
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
 from a2ui.parser import A2uiPart
 from a2ui_support import build_processor
 from langchain.agents import create_agent
-from langchain_core.messages import BaseMessage, ToolMessage
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.graph import END, START, StateGraph
 
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-MCP_CONFIG_PATH = REPO_ROOT / ".mcp.json"
-MODEL = "openai:gpt-4.1"
-
+#
 A2UI_PROCESSOR = build_processor()
 
-SYSTEM_PROMPT = (
-    "You manage an item catalog and look up customer records through the "
-    "provided tools. Always use the tools to add/list/get items and to "
-    "query customer data, and read back results; compute totals, counts, "
-    "and other math yourself from the tool results rather than guessing.\n\n"
-    "When the user wants to create/add a new item but hasn't given you "
-    "concrete values for all of its fields in their message, don't guess "
-    "values or ask for them one-by-one in chat -- instead, respond with an "
-    'A2UI JSON block for a surface named "item_creation", following the '
-    "schema and example below.\n\n"
-    "When the user wants to see item/catalog details (list items, view the "
-    "catalog, etc.), call the list-items tool first, then respond with an "
-    'A2UI JSON block for a surface named "item_table" instead of describing '
-    "the items in plain text, following the schema and example below. "
-    "Populate its /items data-model path with the real items from the "
-    "tool's result (each as {name, description, price, quantity}), not the "
-    "example's placeholder rows.\n\n"
-    f"{A2UI_PROCESSOR.prompt_snippet}"
-)
 
+SYSTEM_PROMPT = (
+    f""" You manage an item catalog and look up customer records through the  
+provided tools. Always use the tools to add/list/get items and to 
+query customer data, and read back results; compute totals, counts, 
+and other math yourself from the tool results rather than guessing.\n\n
+When the user wants to create/add a new item but hasn't given you 
+concrete values for all of its fields in their message, don't guess \n\n 
+{A2UI_PROCESSOR.prompt_snippet}"""
+)
 
 def _print_a2ui_parts(content: str) -> None:
     """Parses the agent's final response for an embedded A2UI JSON block,
@@ -126,24 +107,17 @@ class State(TypedDict):
     result: str
 
 
-def _print_tool_trace(messages: list[BaseMessage]) -> None:
-    """Print every tool call the agent made and the result it got back, in order."""
-    for message in messages:
-        for call in getattr(message, "tool_calls", None) or []:
-            print(f"[CALL]   {call['name']}({call['args']})")
-        if isinstance(message, ToolMessage):
-            print(f"[RESULT] {message.name}: {message.content}")
-
-
 async def agent_node(state: State) -> State:
-    client = MultiServerMCPClient(_load_mcp_connections(MCP_CONFIG_PATH))
+    # Get all tool defs from the MCP server
+    client = MultiServerMCPClient(_load_mcp_connections(Path(__file__).resolve().parent.parent / ".mcp.json"))
     tools = await client.get_tools()
-    agent = create_agent(MODEL, tools, system_prompt=SYSTEM_PROMPT)
+
+    # Invoke the agent with user message
+    agent = create_agent("openai:gpt-4.1", tools, system_prompt=SYSTEM_PROMPT)
     response = await agent.ainvoke({"messages": [{"role": "user", "content": state["query"]}]})
-    _print_tool_trace(response["messages"])
-    final_text = response["messages"][-1].content
-    # _print_a2ui_parts(final_text)
-    return {"result": final_text}
+
+    # Return agent response
+    return {"result": response["messages"][-1].content}
 
 
 graph_builder = StateGraph(State)
@@ -151,21 +125,3 @@ graph_builder.add_node("agent_node", agent_node)
 graph_builder.add_edge(START, "agent_node")
 graph_builder.add_edge("agent_node", END)
 graph = graph_builder.compile()
-
-
-async def main() -> None:
-    query = (
-        "Create new item"
-    )
-    result = await graph.ainvoke({"query": query, "result": ""})
-    print(result["result"])
-
-    print("\n---\n")
-
-    a2ui_query = "I'd like to create a new item for the catalog."
-    a2ui_result = await graph.ainvoke({"query": a2ui_query, "result": ""})
-    print(a2ui_result["result"])
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

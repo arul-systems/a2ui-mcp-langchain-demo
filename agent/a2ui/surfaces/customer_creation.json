@@ -1,0 +1,93 @@
+[
+  {
+    "createSurface": {
+      "surfaceId": "customer_creation",
+      "sendDataModel": true
+    }
+  },
+  {
+    "updateComponents": {
+      "surfaceId": "customer_creation",
+      "components": [
+        { "id": "root", "component": "Card", "child": "form_column" },
+        {
+          "id": "form_column",
+          "component": "Column",
+          "justify": "start",
+          "align": "stretch",
+          "children": [
+            "title",
+            "name_field",
+            "email_field",
+            "phone_field",
+            "city_field",
+            "country_field",
+            "submit_button"
+          ]
+        },
+        { "id": "title", "component": "Text", "text": "Create New Customer", "variant": "h3" },
+        {
+          "id": "name_field",
+          "component": "TextField",
+          "label": "Name",
+          "value": { "path": "/name" },
+          "variant": "shortText"
+        },
+        {
+          "id": "email_field",
+          "component": "TextField",
+          "label": "Email",
+          "value": { "path": "/email" },
+          "variant": "shortText"
+        },
+        {
+          "id": "phone_field",
+          "component": "TextField",
+          "label": "Phone",
+          "value": { "path": "/phone" },
+          "variant": "shortText"
+        },
+        {
+          "id": "city_field",
+          "component": "TextField",
+          "label": "City",
+          "value": { "path": "/city" },
+          "variant": "shortText"
+        },
+        {
+          "id": "country_field",
+          "component": "TextField",
+          "label": "Country",
+          "value": { "path": "/country" },
+          "variant": "shortText"
+        },
+        { "id": "submit_label", "component": "Text", "text": "Create Customer" },
+        {
+          "id": "submit_button",
+          "component": "Button",
+          "child": "submit_label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "create_customer",
+              "context": {
+                "name": { "path": "/name" },
+                "email": { "path": "/email" },
+                "phone": { "path": "/phone" },
+                "city": { "path": "/city" },
+                "country": { "path": "/country" }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "updateDataModel": {
+      "surfaceId": "customer_creation",
+      "path": "/",
+      "value": { "name": "", "email": "", "phone": "", "city": "", "country": "" }
+    }
+  }
+]

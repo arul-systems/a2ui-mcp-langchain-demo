@@ -105,6 +105,37 @@ h1 {
   background: var(--n-0);
 }
 
+/* Table-style borders for item_table: a2ui-basic-row's host is a real flex
+   box (border-bottom works directly on it), but a2ui-basic-text's host is
+   `display: contents` (no box of its own), so its border/padding/flex sizing
+   has to go on the rendered .a2ui-text span instead -- that's the element
+   that actually becomes the flex item inside the row. */
+.surface a2ui-basic-row {
+  border-bottom: 1px solid var(--n-30);
+}
+
+.surface a2ui-basic-row > a2ui-basic-text .a2ui-text {
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 6px 10px;
+  border-right: 1px solid var(--n-30);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.surface a2ui-basic-row > a2ui-basic-text:last-of-type .a2ui-text {
+  border-right: none;
+}
+
+/* Header cells use the "caption" text variant (the only place this surface
+   uses it), so keying off that reliably picks out the header row without
+   depending on its position in the tree. */
+.surface .a2ui-text.caption {
+  font-weight: 600;
+  background: var(--n-20);
+}
+
 .surface-disabled {
   position: relative;
   opacity: 0.55;

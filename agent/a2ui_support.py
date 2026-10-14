@@ -21,6 +21,11 @@ Surfaces defined:
 - "item_table" (item_table.json): a table of item details, with one row per
   item in the /items data-model path, which the agent populates from the
   item-mcp list_items tool's results.
+- "customer_creation" (customer_creation.json): a form with every field
+  needed to create a customer (per customers_mcp/schema.sql).
+- "customer_table" (customer_table.json): a table of customer details, with
+  one row per customer in the /customers data-model path, which the agent
+  populates from a customers-mcp read_query result.
 """
 
 from __future__ import annotations
@@ -41,6 +46,8 @@ PROTOCOL_VERSION = f"v{VERSION_0_9}"
 SURFACE_EXAMPLES = [
     ("item_creation", "item_creation"),
     ("item_table", "item_table"),
+    ("customer_creation", "customer_creation"),
+    ("customer_table", "customer_table"),
 ]
 
 

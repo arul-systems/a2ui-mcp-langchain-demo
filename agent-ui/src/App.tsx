@@ -61,11 +61,19 @@ export function App() {
         let surface: SurfaceEntry | undefined;
         if (data.a2ui.length > 0) {
           const entryProcessor = new MessageProcessor([basicCatalog], (action) => {
-            if (action.name !== "create_item") return;
             const ctx = action.context as Record<string, unknown>;
-            const followUp =
-              `Create an item named "${ctx.name}" with description ` +
-              `"${ctx.description ?? ""}", price ${ctx.price}, and quantity ${ctx.quantity}.`;
+            let followUp: string | undefined;
+            if (action.name === "create_item") {
+              followUp =
+                `Create an item named "${ctx.name}" with description ` +
+                `"${ctx.description ?? ""}", price ${ctx.price}, and quantity ${ctx.quantity}.`;
+            } else if (action.name === "create_customer") {
+              followUp =
+                `Create a customer named "${ctx.name}" with email "${ctx.email}", ` +
+                `phone "${ctx.phone}", city "${ctx.city}", and country "${ctx.country}".`;
+            } else {
+              return;
+            }
             disableSurface(agentEntryId);
             void sendMessage(followUp);
           });

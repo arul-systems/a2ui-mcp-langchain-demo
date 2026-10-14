@@ -1,0 +1,78 @@
+[
+  {
+    "createSurface": {
+      "surfaceId": "customer_table",
+      "sendDataModel": true
+    }
+  },
+  {
+    "updateComponents": {
+      "surfaceId": "customer_table",
+      "components": [
+        { "id": "root", "component": "Card", "child": "table_column" },
+        {
+          "id": "table_column",
+          "component": "Column",
+          "justify": "start",
+          "align": "stretch",
+          "children": ["title", "header_row", "divider", "customers_rows"]
+        },
+        { "id": "title", "component": "Text", "text": "Customers", "variant": "h3" },
+        {
+          "id": "header_row",
+          "component": "Row",
+          "justify": "spaceBetween",
+          "children": ["header_name", "header_email", "header_phone", "header_city", "header_country"]
+        },
+        { "id": "header_name", "component": "Text", "text": "Name", "variant": "caption" },
+        { "id": "header_email", "component": "Text", "text": "Email", "variant": "caption" },
+        { "id": "header_phone", "component": "Text", "text": "Phone", "variant": "caption" },
+        { "id": "header_city", "component": "Text", "text": "City", "variant": "caption" },
+        { "id": "header_country", "component": "Text", "text": "Country", "variant": "caption" },
+        { "id": "divider", "component": "Divider" },
+        {
+          "id": "customers_rows",
+          "component": "Column",
+          "justify": "start",
+          "align": "stretch",
+          "children": { "componentId": "customer_row", "path": "/customers" }
+        },
+        {
+          "id": "customer_row",
+          "component": "Row",
+          "justify": "spaceBetween",
+          "children": ["customer_name", "customer_email", "customer_phone", "customer_city", "customer_country"]
+        },
+        { "id": "customer_name", "component": "Text", "text": { "path": "name" } },
+        { "id": "customer_email", "component": "Text", "text": { "path": "email" } },
+        { "id": "customer_phone", "component": "Text", "text": { "path": "phone" } },
+        { "id": "customer_city", "component": "Text", "text": { "path": "city" } },
+        { "id": "customer_country", "component": "Text", "text": { "path": "country" } }
+      ]
+    }
+  },
+  {
+    "updateDataModel": {
+      "surfaceId": "customer_table",
+      "path": "/",
+      "value": {
+        "customers": [
+          {
+            "name": "Jane Doe",
+            "email": "jane@example.com",
+            "phone": "+1-555-0100",
+            "city": "Austin",
+            "country": "United States"
+          },
+          {
+            "name": "Ravi Shankar",
+            "email": "ravi@example.com",
+            "phone": "+1-555-0101",
+            "city": "Bengaluru",
+            "country": "India"
+          }
+        ]
+      }
+    }
+  }
+]
