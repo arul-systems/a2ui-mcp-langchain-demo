@@ -8,3 +8,6 @@ __pycache__
 *.pyc
 agent/customers_mcp/customers.db
 /.idea/
+agent-ui/node_modules
+agent-ui/dist
+agent-ui/*.tsbuildinfo

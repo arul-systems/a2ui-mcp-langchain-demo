@@ -1,0 +1,64 @@
+[
+  {
+    "createSurface": {
+      "surfaceId": "item_table",
+      "sendDataModel": true
+    }
+  },
+  {
+    "updateComponents": {
+      "surfaceId": "item_table",
+      "components": [
+        { "id": "root", "component": "Card", "child": "table_column" },
+        {
+          "id": "table_column",
+          "component": "Column",
+          "justify": "start",
+          "align": "stretch",
+          "children": ["title", "header_row", "divider", "items_rows"]
+        },
+        { "id": "title", "component": "Text", "text": "Item Catalog", "variant": "h3" },
+        {
+          "id": "header_row",
+          "component": "Row",
+          "justify": "spaceBetween",
+          "children": ["header_name", "header_description", "header_price", "header_quantity"]
+        },
+        { "id": "header_name", "component": "Text", "text": "Name", "variant": "caption" },
+        { "id": "header_description", "component": "Text", "text": "Description", "variant": "caption" },
+        { "id": "header_price", "component": "Text", "text": "Price", "variant": "caption" },
+        { "id": "header_quantity", "component": "Text", "text": "Quantity", "variant": "caption" },
+        { "id": "divider", "component": "Divider" },
+        {
+          "id": "items_rows",
+          "component": "Column",
+          "justify": "start",
+          "align": "stretch",
+          "children": { "componentId": "item_row", "path": "/items" }
+        },
+        {
+          "id": "item_row",
+          "component": "Row",
+          "justify": "spaceBetween",
+          "children": ["item_name", "item_description", "item_price", "item_quantity"]
+        },
+        { "id": "item_name", "component": "Text", "text": { "path": "name" } },
+        { "id": "item_description", "component": "Text", "text": { "path": "description" } },
+        { "id": "item_price", "component": "Text", "text": { "path": "price" } },
+        { "id": "item_quantity", "component": "Text", "text": { "path": "quantity" } }
+      ]
+    }
+  },
+  {
+    "updateDataModel": {
+      "surfaceId": "item_table",
+      "path": "/",
+      "value": {
+        "items": [
+          { "name": "Widget", "description": "A simple widget", "price": 9.99, "quantity": 10 },
+          { "name": "Gadget", "description": "A handy gadget", "price": 14.5, "quantity": 5 }
+        ]
+      }
+    }
+  }
+]

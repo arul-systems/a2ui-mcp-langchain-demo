@@ -1,0 +1,84 @@
+[
+  {
+    "createSurface": {
+      "surfaceId": "item_creation",
+      "sendDataModel": true
+    }
+  },
+  {
+    "updateComponents": {
+      "surfaceId": "item_creation",
+      "components": [
+        { "id": "root", "component": "Card", "child": "form_column" },
+        {
+          "id": "form_column",
+          "component": "Column",
+          "justify": "start",
+          "align": "stretch",
+          "children": [
+            "title",
+            "name_field",
+            "description_field",
+            "price_field",
+            "quantity_field",
+            "submit_button"
+          ]
+        },
+        { "id": "title", "component": "Text", "text": "Create New Item", "variant": "h3" },
+        {
+          "id": "name_field",
+          "component": "TextField",
+          "label": "Name",
+          "value": { "path": "/name" },
+          "variant": "shortText"
+        },
+        {
+          "id": "description_field",
+          "component": "TextField",
+          "label": "Description",
+          "value": { "path": "/description" },
+          "variant": "longText"
+        },
+        {
+          "id": "price_field",
+          "component": "TextField",
+          "label": "Price (USD)",
+          "value": { "path": "/price" },
+          "variant": "number"
+        },
+        {
+          "id": "quantity_field",
+          "component": "TextField",
+          "label": "Quantity in stock",
+          "value": { "path": "/quantity" },
+          "variant": "number"
+        },
+        { "id": "submit_label", "component": "Text", "text": "Create Item" },
+        {
+          "id": "submit_button",
+          "component": "Button",
+          "child": "submit_label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "create_item",
+              "context": {
+                "name": { "path": "/name" },
+                "description": { "path": "/description" },
+                "price": { "path": "/price" },
+                "quantity": { "path": "/quantity" }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "updateDataModel": {
+      "surfaceId": "item_creation",
+      "path": "/",
+      "value": { "name": "", "description": "", "price": 0, "quantity": 0 }
+    }
+  }
+]

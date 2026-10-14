@@ -5,7 +5,7 @@
     },
     "customers-mcp": {
       "command": "uv",
-      "args": ["run", "mcp-server-sqlite", "--db-path", "agent/customers-mcp/customers.db"],
+      "args": ["run", "mcp-server-sqlite", "--db-path", "agent/customers_mcp/customers.db"],
       "cwd": "/Users/rshankar/ravi/projects/agentic_ai/a2ui-mcp-langchain-demo"
     }
   }
