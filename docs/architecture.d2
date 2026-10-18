@@ -22,33 +22,30 @@ backend: Agent Backend (Python) {
   a2ui_support: A2UI Processor\na2ui_support.py {
     icon: https://icons.terrastruct.com/dev/python.svg
   }
+  customers_db: customers.db\n(SQLite, local file) {
+    shape: cylinder
+    icon: https://icons.terrastruct.com/essentials/117-database.svg
+  }
+  customers_mcp: customers-mcp\n(/customers-mcp) {
+    icon: https://icons.terrastruct.com/dev/python.svg
+  }
 
   api -> agent_core: run_agent()
   api -> a2ui_support: parse_response()
+  agent_core -> customers_mcp: "read_query / write_query\n(HTTP, same Function App)"
+  customers_mcp -> customers_db: "SQL"
+}
+
+item_mcp: item-mcp\n(own Azure Function, in-memory state) {
+  icon: https://icons.terrastruct.com/dev/python.svg
 }
 
 llm: OpenAI API\n(LLM) {
   shape: cloud
 }
 
-mcp_servers: MCP Servers (.mcp.json) {
-  item_mcp: item-mcp\nHTTP, in-memory state {
-    icon: https://icons.terrastruct.com/dev/python.svg
-  }
-  customers_mcp: customers-mcp\nstdio, mcp-server-sqlite {
-    icon: https://icons.terrastruct.com/dev/python.svg
-  }
-}
-
-customers_db: customers.db\n(SQLite) {
-  shape: cylinder
-  icon: https://icons.terrastruct.com/essentials/117-database.svg
-}
-
 user -> frontend: "interacts with form/chat"
 frontend -> backend.api: "POST /chat"
 backend.api -> frontend: "{ text, a2ui[] }"
 backend.agent_core -> llm: "chat completion"
-backend.agent_core -> mcp_servers.item_mcp: "list_items / create_item"
-backend.agent_core -> mcp_servers.customers_mcp: "read_query / write_query"
-mcp_servers.customers_mcp -> customers_db: "SQL"
+backend.agent_core -> item_mcp: "list_items / create_item (.mcp.json)"

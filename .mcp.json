@@ -1,12 +1,10 @@
 {
   "mcpServers": {
     "item-mcp": {
-      "url": "http://127.0.0.1:8010/mcp"
+      "url": "https://a2uidemo-item-mcp.azurewebsites.net/mcp"
     },
     "customers-mcp": {
-      "command": "uv",
-      "args": ["run", "mcp-server-sqlite", "--db-path", "agent/customers_mcp/customers.db"],
-      "cwd": "/Users/rshankar/ravi/projects/agentic_ai/a2ui-mcp-langchain-demo"
+      "url": "https://a2uidemo-agent.azurewebsites.net/customers-mcp"
     }
   }
 }

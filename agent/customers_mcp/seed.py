@@ -1,12 +1,12 @@
 """Generates ~50 dummy customers and loads them into customers.db.
 
-Run with:
-    uv run python agent/customers-mcp/seed.py
+Run with (from agent/, so customers_mcp resolves as a package):
+    uv run python -m customers_mcp.seed
 """
 
 import random
 
-from database import get_connection, init_db
+from customers_mcp.database import get_connection, init_db
 
 FIRST_NAMES = [
     "James", "Mary", "Robert", "Patricia", "John", "Jennifer", "Michael", "Linda",

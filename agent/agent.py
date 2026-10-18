@@ -1,20 +1,23 @@
 """LangChain agent that manages an item catalog and looks up customer data,
 via MCP tools.
 
-Server definitions live in a single place, .mcp.json at the repo root,
-instead of being duplicated here. This loads it and builds a
-langchain-mcp-adapters MultiServerMCPClient with one connection per server
-listed there:
+Server definitions live in a single place, .mcp.json: checked in at the
+repo root for local dev, but copied alongside this file by the deploy
+workflow since it needs to ship inside the Azure Functions package (see
+_find_mcp_config). This loads it and builds a langchain-mcp-adapters
+MultiServerMCPClient with one connection per server listed there:
 
-- "item-mcp": streamable HTTP, pointing at an already-running server.
-  Item state lives in that process's memory, so it must stay one
-  long-lived process shared across calls; a fresh subprocess per call
-  would lose previously added items. Start it first:
-      uv run python agent/item-mcp/mcp_server.py --http
-- "customers-mcp": stdio, spawned on demand. Safe to spawn fresh per tool
-  call (langchain-mcp-adapters opens a new session -- a new subprocess,
-  for stdio -- per call) because its state lives in the customers.db
-  file on disk, not in the process.
+- "item-mcp": item_mcp/mcp_server.py's FastMCP server. Item state lives in
+  that process's memory, so it must stay one long-lived process shared
+  across calls -- a fresh instance per call would lose previously added
+  items. Locally, an already-running server reachable over streamable
+  HTTP (uv run python agent/item_mcp/mcp_server.py --http); deployed,
+  it's the /mcp function co-hosted on this same Function App
+  (agent/function_app.py, tofu/agent.tf).
+- "customers-mcp": customers_mcp/mcp_server.py's FastMCP server
+  (read_query/write_query against customers.db). No long-lived-process
+  requirement, since its state lives on disk, not in memory. Deployed,
+  it's the /customers-mcp function on this same Function App.
 
 Also requires OPENAI_API_KEY to be set (e.g. in a .env file at the repo root).
 
@@ -103,12 +106,26 @@ def _load_mcp_connections(config_path: Path) -> dict[str, dict]:
     return connections
 
 
+def _find_mcp_config() -> Path:
+    """Locates .mcp.json: checked in at the repo root for local dev, one
+    directory above this file. The deploy workflow copies it to sit
+    alongside agent.py instead, since the Azure Functions package is this
+    directory's contents flattened to the site root -- there's no
+    separate parent directory once deployed.
+    """
+    here = Path(__file__).resolve().parent
+    for candidate in (here / ".mcp.json", here.parent / ".mcp.json"):
+        if candidate.exists():
+            return candidate
+    raise FileNotFoundError(f"No .mcp.json found next to {here} or its parent")
+
+
 async def run_agent(query: str) -> str:
     """Runs one turn of the LangChain agent for the given user query and
     returns its final text response (which may embed an A2UI JSON block).
     """
-    # Get all tool defs from the MCP server
-    client = MultiServerMCPClient(_load_mcp_connections(Path(__file__).resolve().parent.parent / ".mcp.json"))
+    # Get all tool defs from the MCP servers
+    client = MultiServerMCPClient(_load_mcp_connections(_find_mcp_config()))
     tools = await client.get_tools()
 
     # Invoke the agent with user message

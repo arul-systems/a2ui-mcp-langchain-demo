@@ -25,7 +25,7 @@ Surfaces defined:
   needed to create a customer (per customers_mcp/schema.sql).
 - "customer_table" (customer_table.json): a table of customer details, with
   one row per customer in the /customers data-model path, which the agent
-  populates from a customers-mcp read_query result.
+  populates from a read_query tool result (agent.py).
 """
 
 from __future__ import annotations
