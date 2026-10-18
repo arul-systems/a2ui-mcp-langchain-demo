@@ -1,7 +1,6 @@
 .idea
 *.iml
 
-
 .venv
 .env
 __pycache__
@@ -18,3 +17,5 @@ tofu/*.tfstate.*
 tofu/*.tfvars
 tofu/*.tfvars.json
 tofu/crash.log
+
+commands.txt

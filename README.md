@@ -24,9 +24,10 @@ with [D2](https://d2lang.com). Regenerate after edits with:
   backend (`POST /chat`) and renders the response: plain text in the chat
   log, and any A2UI JSON as a live surface via `@a2ui/react` /
   `@a2ui/web_core`.
-- **`agent/server.py`** — FastAPI backend exposing the single `/chat`
-  endpoint. Runs one turn of the LangChain agent, then splits its answer
-  into a text part and validated A2UI message parts for the frontend.
+- **`agent/function_app.py`** — a native Azure Functions HTTP trigger (no
+  FastAPI/ASGI layer) exposing the single `/chat` route. Runs one turn of
+  the LangChain agent, then splits its answer into a text part and
+  validated A2UI message parts for the frontend.
 - **`agent/agent.py`** — Builds and runs a `langchain.agents.create_agent`
   agent (OpenAI model). Its system prompt is extended with the A2UI
   protocol schema plus a few-shot example per surface, so the model knows
@@ -55,15 +56,15 @@ with [D2](https://d2lang.com). Regenerate after edits with:
 ### Request flow
 
 1. User types a message in `agent-ui`, which `POST`s it to `/chat`.
-2. `server.py` calls `run_agent(...)` (`agent.py`), which invokes the
-   LangChain agent. The agent calls `item-mcp`/`customers-mcp` tools as needed (printing each tool call and its result)
-   and asks the OpenAI model to
-   compute/compose the final answer.
+2. `function_app.py`'s `chat()` calls `run_agent(...)` (`agent.py`), which
+   invokes the LangChain agent. The agent calls `item-mcp`/`customers-mcp`
+   tools as needed (printing each tool call and its result) and asks the
+   OpenAI model to compute/compose the final answer.
 3. If the user asked to create something without giving concrete field
    values, the model's answer embeds an `<a2ui-json>` block (e.g. the
    `customer_creation` or `item_creation` surface) instead of guessing
    values.
-4. `server.py` validates the response with the same `A2uiRequestProcessor`
+4. `chat()` validates the response with the same `A2uiRequestProcessor`
    used to build the prompt, splitting it into `{ text, a2ui: [...] }`.
 5. `agent-ui` renders `text` in the chat log and feeds each `a2ui` message
    to its A2UI surface renderer, which displays the live form/table. Field-
@@ -73,8 +74,9 @@ with [D2](https://d2lang.com). Regenerate after edits with:
 
 ## Running it
 
-Requires Python 3.12+, [`uv`](https://docs.astral.sh/uv/), and Node.js for
-the frontend.
+Requires Python 3.12+, [`uv`](https://docs.astral.sh/uv/),
+[Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
+(for `func start`), and Node.js for the frontend.
 
 1. Copy `.env.example` to `.env` and set `OPENAI_API_KEY`.
 2. Install Python deps: `uv sync`
@@ -83,9 +85,12 @@ the frontend.
    ```
    uv run python agent/item_mcp/mcp_server.py --http
    ```
-4. Start the backend:
+4. Start the backend (`agent-ui` expects it on port 8000, not `func
+   start`'s default of 7071; `--cors` allows the Vite dev server's origin,
+   which the deployed Function App gets for free from `tofu/agent.tf`'s
+   `site_config.cors` instead):
    ```
-   uv run uvicorn server:app --reload --port 8000 --app-dir agent
+   cd agent && func start --port 8000 --cors http://localhost:5173
    ```
 5. Start the frontend:
    ```

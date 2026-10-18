@@ -10,7 +10,7 @@ resource "random_string" "suffix" {
 }
 
 resource "azurerm_resource_group" "main" {
-  name     = var.resource_group_name
+  name     = "${local.name_prefix}rg${random_string.suffix.result}"
   location = var.location
   tags     = var.tags
 }
@@ -43,12 +43,18 @@ resource "azurerm_storage_account" "func" {
   tags = var.tags
 }
 
+resource "azurerm_storage_container" "func_deployments" {
+  name                  = "function-deployments"
+  storage_account_id    = azurerm_storage_account.func.id
+  container_access_type = "private"
+}
+
 resource "azurerm_service_plan" "func" {
   name                = "${local.name_prefix}-plan"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   os_type             = "Linux"
-  sku_name            = "Y1"
+  sku_name            = "FC1"
 
   tags = var.tags
 }
@@ -62,34 +68,35 @@ resource "azurerm_application_insights" "func" {
   tags = var.tags
 }
 
-resource "azurerm_linux_function_app" "agent" {
+resource "azurerm_function_app_flex_consumption" "agent" {
   name                = "${local.name_prefix}-agent"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
+  service_plan_id     = azurerm_service_plan.func.id
 
-  service_plan_id            = azurerm_service_plan.func.id
-  storage_account_name       = azurerm_storage_account.func.name
-  storage_account_access_key = azurerm_storage_account.func.primary_access_key
+  storage_container_type      = "blobContainer"
+  storage_container_endpoint  = "${azurerm_storage_account.func.primary_blob_endpoint}${azurerm_storage_container.func_deployments.name}"
+  storage_authentication_type = "StorageAccountConnectionString"
+  storage_access_key          = azurerm_storage_account.func.primary_access_key
+
+  runtime_name           = "python"
+  runtime_version        = "3.12"
+  maximum_instance_count = 100
+  instance_memory_in_mb  = 2048
 
   identity {
     type = "SystemAssigned"
   }
 
   site_config {
-    application_insights_connection_string = azurerm_application_insights.func.connection_string
-
-    application_stack {
-      python_version = "3.12"
-    }
-
     cors {
       allowed_origins = [trimsuffix(azurerm_storage_account.ui.primary_web_endpoint, "/")]
     }
   }
 
   app_settings = {
-    FUNCTIONS_WORKER_RUNTIME = "python"
-    OPENAI_API_KEY           = var.openai_api_key
+    OPENAI_API_KEY                        = var.openai_api_key
+    APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.func.connection_string
   }
 
   tags = var.tags
@@ -107,10 +114,10 @@ output "ui_storage_account_name" {
 
 output "function_app_url" {
   description = "Public HTTPS URL of the agent Function App."
-  value       = "https://${azurerm_linux_function_app.agent.default_hostname}"
+  value       = "https://${azurerm_function_app_flex_consumption.agent.default_hostname}"
 }
 
 output "function_app_name" {
   description = "Function App name, for `func azure functionapp publish <name>` or az cli deploys."
-  value       = azurerm_linux_function_app.agent.name
+  value       = azurerm_function_app_flex_consumption.agent.name
 }
