@@ -12,7 +12,9 @@ frontend: agent-ui\n(React + A2UI renderer) {
   icon: https://icons.terrastruct.com/dev/react.svg
 }
 
-backend: Agent Backend (Python) {
+backend: Agent Function App\n(Azure Functions, Flex Consumption) {
+  icon: https://icons.terrastruct.com/azure/Compute%20Service%20Color/Function%20Apps.svg
+
   api: Azure Function\nfunction_app.py {
     icon: https://icons.terrastruct.com/dev/python.svg
   }
@@ -36,12 +38,12 @@ backend: Agent Backend (Python) {
   customers_mcp -> customers_db: "SQL"
 }
 
-item_mcp: item-mcp\n(own Azure Function, in-memory state) {
-  icon: https://icons.terrastruct.com/dev/python.svg
+item_mcp: item-mcp\n(own Azure Function App, in-memory state) {
+  icon: https://icons.terrastruct.com/azure/Compute%20Service%20Color/Function%20Apps.svg
 }
 
 llm: OpenAI API\n(LLM) {
-  shape: cloud
+  icon: https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg
 }
 
 user -> frontend: "interacts with form/chat"
