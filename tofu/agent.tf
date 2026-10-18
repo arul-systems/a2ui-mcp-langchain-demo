@@ -90,7 +90,10 @@ resource "azurerm_function_app_flex_consumption" "agent" {
 
   site_config {
     cors {
-      allowed_origins = [trimsuffix(azurerm_storage_account.ui.primary_web_endpoint, "/")]
+      allowed_origins = [
+        trimsuffix(azurerm_storage_account.ui.primary_web_endpoint, "/"),
+        "https://portal.azure.com",
+      ]
     }
   }
 
