@@ -10,6 +10,14 @@ host_origin_protection is disabled: it defends against DNS-rebinding
 attacks on localhost-bound dev servers, which doesn't apply to a
 cloud-hosted endpoint called server-to-server by the agent Function App.
 
+stateless_http is enabled: a Flex Consumption Function App can run
+multiple instances, so a tool-call request isn't guaranteed to land on
+the same instance that issued the session during the client's
+list_tools() call -- the default stateful mode keeps session state in
+that instance's memory keyed by mcp-session-id, so a request landing
+elsewhere gets "Session terminated". Stateless mode uses a fresh
+transport per request instead.
+
 NOTE: item state lives in this process's memory (see store.py) and, per
 mcp_server.py's own docstring, "must stay one long-lived process shared
 across tool calls" for item-creation/listing to behave consistently. A
@@ -26,5 +34,5 @@ import azure.functions as func
 
 from mcp_server import mcp
 
-asgi_app = mcp.http_app(host_origin_protection=False)
+asgi_app = mcp.http_app(stateless_http=True, host_origin_protection=False)
 app = func.AsgiFunctionApp(app=asgi_app, http_auth_level=func.AuthLevel.ANONYMOUS)

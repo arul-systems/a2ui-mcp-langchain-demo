@@ -39,10 +39,18 @@ app = func.FunctionApp()
 # answers requests at the exact path it's mounted at (defaults to /mcp
 # regardless of the outer route name), so leaving this unset here would
 # 404 on every request even though the Azure Function itself is reachable.
+# stateless_http=True: a Flex Consumption Function App can run multiple
+# instances, so a tool-call request isn't guaranteed to land on the same
+# instance that issued the session during list_tools() -- the default
+# stateful mode keeps session state in that instance's memory keyed by
+# mcp-session-id, so a request landing elsewhere gets "Session
+# terminated". Stateless mode uses a fresh transport per request instead.
 # host_origin_protection defends against DNS-rebinding attacks on
 # localhost-bound dev servers, which doesn't apply to a cloud-hosted
 # endpoint called server-to-server by this same app's /chat.
-_customers_mcp_asgi = func.AsgiMiddleware(customers_mcp.http_app(path="/customers-mcp", host_origin_protection=False))
+_customers_mcp_asgi = func.AsgiMiddleware(
+    customers_mcp.http_app(path="/customers-mcp", stateless_http=True, host_origin_protection=False)
+)
 _customers_mcp_started = False
 
 
