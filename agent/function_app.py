@@ -35,10 +35,14 @@ from customers_mcp.mcp_server import mcp as customers_mcp
 
 app = func.FunctionApp()
 
+# path must match the outer Azure route below: FastMCP's ASGI app only
+# answers requests at the exact path it's mounted at (defaults to /mcp
+# regardless of the outer route name), so leaving this unset here would
+# 404 on every request even though the Azure Function itself is reachable.
 # host_origin_protection defends against DNS-rebinding attacks on
 # localhost-bound dev servers, which doesn't apply to a cloud-hosted
 # endpoint called server-to-server by this same app's /chat.
-_customers_mcp_asgi = func.AsgiMiddleware(customers_mcp.http_app(host_origin_protection=False))
+_customers_mcp_asgi = func.AsgiMiddleware(customers_mcp.http_app(path="/customers-mcp", host_origin_protection=False))
 _customers_mcp_started = False
 
 
