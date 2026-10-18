@@ -6,7 +6,7 @@ Run with stdio transport (for Claude Desktop / Claude Code):
     uv run python agent/item-mcp/mcp_server.py
 
 Run with HTTP transport (for remote MCP clients, e.g. the LangChain agent
-in agent/graph.py -- required because item state lives in this process's
+in agent/agent.py -- required because item state lives in this process's
 memory and must stay one long-lived process shared across tool calls):
     uv run python agent/item-mcp/mcp_server.py --http
 """

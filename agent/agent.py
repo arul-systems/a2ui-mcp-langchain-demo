@@ -1,5 +1,5 @@
-"""Single-node LangGraph that uses an LLM agent to manage the item catalog
-and look up customer data, via MCP tools.
+"""LangChain agent that manages an item catalog and looks up customer data,
+via MCP tools.
 
 Server definitions live in a single place, .mcp.json at the repo root,
 instead of being duplicated here. This loads it and builds a
@@ -32,38 +32,37 @@ Every tool call the agent makes -- including the literal SQL text sent to
 customers-mcp's read_query/write_query tools -- is printed as it happens,
 followed by any validated A2UI messages found in the final answer.
 
-Run this graph:
-    uv run python agent/graph.py
+Run this agent:
+    uv run python agent/agent.py
 """
 
 import json
 from pathlib import Path
-from typing import TypedDict
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from a2ui.parser import A2uiPart
 from a2ui_support import build_processor
 from langchain.agents import create_agent
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from langgraph.graph import END, START, StateGraph
 
-#
 A2UI_PROCESSOR = build_processor()
 
-
 SYSTEM_PROMPT = (
-    f""" You manage an item catalog and look up customer records through the  
-provided tools. Always use the tools to add/list/get items and to 
-query customer data, and read back results; compute totals, counts, 
+    f""" You manage an item catalog and look up customer records through the
+provided tools. Always use the tools to add/list/get items and to
+query customer data, and read back results; compute totals, counts,
 and other math yourself from the tool results rather than guessing.\n\n
-When the user wants to create/add a new item but hasn't given you 
+When the user wants to create/add a new item but hasn't given you
 concrete values for all of its fields in their message, don't guess. \n\n
 
- 
+After successful creation of customer/item ask user what else they need todo next.
+
 {A2UI_PROCESSOR.prompt_snippet}"""
 )
+
 
 def _print_a2ui_parts(content: str) -> None:
     """Parses the agent's final response for an embedded A2UI JSON block,
@@ -104,26 +103,17 @@ def _load_mcp_connections(config_path: Path) -> dict[str, dict]:
     return connections
 
 
-class State(TypedDict):
-    query: str
-    result: str
-
-
-async def agent_node(state: State) -> State:
+async def run_agent(query: str) -> str:
+    """Runs one turn of the LangChain agent for the given user query and
+    returns its final text response (which may embed an A2UI JSON block).
+    """
     # Get all tool defs from the MCP server
     client = MultiServerMCPClient(_load_mcp_connections(Path(__file__).resolve().parent.parent / ".mcp.json"))
     tools = await client.get_tools()
 
     # Invoke the agent with user message
     agent = create_agent("openai:gpt-4.1", tools, system_prompt=SYSTEM_PROMPT)
-    response = await agent.ainvoke({"messages": [{"role": "user", "content": state["query"]}]})
+    response = await agent.ainvoke({"messages": [{"role": "user", "content": query}]})
 
     # Return agent response
-    return {"result": response["messages"][-1].content}
-
-
-graph_builder = StateGraph(State)
-graph_builder.add_node("agent_node", agent_node)
-graph_builder.add_edge(START, "agent_node")
-graph_builder.add_edge("agent_node", END)
-graph = graph_builder.compile()
+    return response["messages"][-1].content

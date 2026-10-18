@@ -16,14 +16,14 @@ backend: Agent Backend (Python) {
   api: FastAPI\nserver.py {
     icon: https://icons.terrastruct.com/dev/python.svg
   }
-  agent_graph: LangGraph Agent\ngraph.py {
+  agent_core: LangChain Agent\nagent.py {
     icon: https://icons.terrastruct.com/dev/python.svg
   }
   a2ui_support: A2UI Processor\na2ui_support.py {
     icon: https://icons.terrastruct.com/dev/python.svg
   }
 
-  api -> agent_graph: ainvoke()
+  api -> agent_core: run_agent()
   api -> a2ui_support: parse_response()
 }
 
@@ -48,7 +48,7 @@ customers_db: customers.db\n(SQLite) {
 user -> frontend: "interacts with form/chat"
 frontend -> backend.api: "POST /chat"
 backend.api -> frontend: "{ text, a2ui[] }"
-backend.agent_graph -> llm: "chat completion"
-backend.agent_graph -> mcp_servers.item_mcp: "list_items / create_item"
-backend.agent_graph -> mcp_servers.customers_mcp: "read_query / write_query"
+backend.agent_core -> llm: "chat completion"
+backend.agent_core -> mcp_servers.item_mcp: "list_items / create_item"
+backend.agent_core -> mcp_servers.customers_mcp: "read_query / write_query"
 mcp_servers.customers_mcp -> customers_db: "SQL"

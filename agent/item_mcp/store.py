@@ -11,6 +11,8 @@ class ItemStore:
     def add_item(self, item: Item) -> Item:
         with self._lock:
             self._items[item.id] = item
+
+        print(f'Total users {self._items}')
         return item
 
     def list_items(self) -> list[Item]:

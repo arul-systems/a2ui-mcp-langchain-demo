@@ -11,3 +11,10 @@ agent/customers_mcp/customers.db
 agent-ui/node_modules
 agent-ui/dist
 agent-ui/*.tsbuildinfo
+
+tofu/.terraform
+tofu/*.tfstate
+tofu/*.tfstate.*
+tofu/*.tfvars
+tofu/*.tfvars.json
+tofu/crash.log

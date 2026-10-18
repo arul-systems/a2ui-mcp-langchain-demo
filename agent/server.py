@@ -1,9 +1,9 @@
-"""HTTP backend for agent-ui/: wraps the LangGraph agent in graph.py behind
+"""HTTP backend for agent-ui/: wraps the LangChain agent in agent.py behind
 a single POST /chat endpoint.
 
 Each response is split into its plain-text portion and any validated A2UI
 messages (using the same A2uiRequestProcessor the agent's system prompt is
-built from -- see graph.A2UI_PROCESSOR / a2ui_support.build_processor) so
+built from -- see agent.A2UI_PROCESSOR / a2ui_support.build_processor) so
 the React app can show the text in the chat log and feed the A2UI messages
 to its A2UI renderer separately.
 
@@ -25,9 +25,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from a2ui.parser import A2uiPart, TextPart
+from agent import A2UI_PROCESSOR, run_agent
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from graph import A2UI_PROCESSOR, graph
 from pydantic import BaseModel
 
 app = FastAPI(title="Agent Chat API")
@@ -52,8 +52,7 @@ class ChatResponse(BaseModel):
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
     """Runs one turn of the agent and splits its answer into text + A2UI."""
-    result = await graph.ainvoke({"query": request.message, "result": ""})
-    content = result["result"]
+    content = await run_agent(request.message)
 
     try:
         parts = A2UI_PROCESSOR.parse_response(content)

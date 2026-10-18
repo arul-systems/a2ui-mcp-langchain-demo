@@ -1,4 +1,4 @@
-# a2ui-mcp-langchain-demo
+# A2UI MCP LangChain Demo
 
 A chat agent that manages an item catalog and looks up customer records
 through [MCP](https://modelcontextprotocol.io/) tools, and renders its
@@ -25,13 +25,12 @@ with [D2](https://d2lang.com). Regenerate after edits with:
   log, and any A2UI JSON as a live surface via `@a2ui/react` /
   `@a2ui/web_core`.
 - **`agent/server.py`** — FastAPI backend exposing the single `/chat`
-  endpoint. Runs one turn of the LangGraph agent, then splits its answer
+  endpoint. Runs one turn of the LangChain agent, then splits its answer
   into a text part and validated A2UI message parts for the frontend.
-- **`agent/graph.py`** — A single-node LangGraph graph wrapping a
-  `langchain.agents.create_agent` agent (OpenAI model). Its system prompt
-  is extended with the A2UI protocol schema plus a few-shot example per
-  surface, so the model knows how to emit `<a2ui-json>` blocks for forms
-  and tables it wants to show.
+- **`agent/agent.py`** — Builds and runs a `langchain.agents.create_agent`
+  agent (OpenAI model). Its system prompt is extended with the A2UI
+  protocol schema plus a few-shot example per surface, so the model knows
+  how to emit `<a2ui-json>` blocks for forms and tables it wants to show.
 - **`agent/a2ui_support.py`** — Builds the `A2uiRequestProcessor` (from the
   `a2ui` SDK) that both supplies that prompt snippet and validates/parses
   whatever A2UI JSON the LLM actually produces.
@@ -42,13 +41,13 @@ with [D2](https://d2lang.com). Regenerate after edits with:
   action's event name and payload.
 - **MCP servers**, configured once in `.mcp.json` and loaded by the agent
   via `langchain-mcp-adapters`:
-  - **`item-mcp`** (`agent/item_mcp/`) — a FastAPI item-catalog app exposed
-    as MCP tools via `fastmcp.FastMCP.from_fastapi`. Runs over streamable
-    HTTP as one long-lived process, because item state lives in that
-    process's memory and must be shared across tool calls.
-  - **`customers-mcp`** — the third-party `mcp-server-sqlite` server,
-    spawned over stdio on demand, reading/writing `customers.db`. Safe to
-    spawn fresh per call since its state lives on disk, not in memory.
+    - **`item-mcp`** (`agent/item_mcp/`) — a FastAPI item-catalog app exposed
+      as MCP tools via `fastmcp.FastMCP.from_fastapi`. Runs over streamable
+      HTTP as one long-lived process, because item state lives in that
+      process's memory and must be shared across tool calls.
+    - **`customers-mcp`** — the third-party `mcp-server-sqlite` server,
+      spawned over stdio on demand, reading/writing `customers.db`. Safe to
+      spawn fresh per call since its state lives on disk, not in memory.
 - **`agent/customers_mcp/`** — the SQLite customer database (`schema.sql`,
   seed data, and the `customers.db` file itself) that `customers-mcp`
   serves.
@@ -56,9 +55,9 @@ with [D2](https://d2lang.com). Regenerate after edits with:
 ### Request flow
 
 1. User types a message in `agent-ui`, which `POST`s it to `/chat`.
-2. `server.py` runs `graph.ainvoke(...)`, which invokes the LangChain
-   agent. The agent calls `item-mcp`/`customers-mcp` tools as needed
-   (printing each tool call and its result) and asks the OpenAI model to
+2. `server.py` calls `run_agent(...)` (`agent.py`), which invokes the
+   LangChain agent. The agent calls `item-mcp`/`customers-mcp` tools as needed (printing each tool call and its result)
+   and asks the OpenAI model to
    compute/compose the final answer.
 3. If the user asked to create something without giving concrete field
    values, the model's answer embeds an `<a2ui-json>` block (e.g. the
