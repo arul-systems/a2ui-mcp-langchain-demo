@@ -38,7 +38,7 @@ from a2ui.parser import normalize_prompt_example_messages
 from a2ui.processor import A2uiGenerator, A2uiRequestProcessor, CatalogConfig
 from a2ui.schema import VERSION_0_9
 
-A2UI_DIR = Path(__file__).resolve().parent.parent / "agent" / "a2ui"
+A2UI_DIR = Path(__file__).resolve().parent / "a2ui"
 PROTOCOL_VERSION = f"v{VERSION_0_9}"
 
 # (surface file name, surfaceId) for every surface the agent has a few-shot
