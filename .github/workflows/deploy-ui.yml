@@ -29,6 +29,8 @@ jobs:
 
       - name: Build
         working-directory: agent-ui
+        env:
+          VITE_API_BASE: https://${{ vars.AZURE_FUNCTIONAPP_NAME }}.azurewebsites.net
         run: npm run build
 
       - name: Azure login (OIDC)

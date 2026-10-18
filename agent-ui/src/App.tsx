@@ -4,7 +4,7 @@ import { basicCatalog } from "@a2ui/web_core/v0_9/basic_catalog";
 import { MessageProcessor, type SurfaceModel } from "@a2ui/web_core/v0_9";
 import { type FormEvent, useCallback, useRef, useState } from "react";
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = import.meta.env.VITE_API_BASE ?? "http://127.0.0.1:8000";
 
 interface SurfaceEntry {
   model: SurfaceModel;
